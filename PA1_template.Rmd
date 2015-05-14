@@ -125,3 +125,5 @@ avgintervaldays <- summarise(activitygrouped, average = mean(steps, na.rm=T))
 qplot(x=interval, y=average, data=avgintervaldays, facets=daytype~., geom="line",
       xlab="Time of Day (minutes from midnight)", ylab="Average Number of Steps Recorded")
 ```
+
+The above graph show significant differences in activity patterns on weekdays and weekends. 

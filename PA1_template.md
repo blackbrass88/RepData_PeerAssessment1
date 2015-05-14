@@ -160,3 +160,5 @@ qplot(x=interval, y=average, data=avgintervaldays, facets=daytype~., geom="line"
 ```
 
 ![plot of chunk unnamed-chunk-14](figure/unnamed-chunk-14-1.png) 
+
+The above graph show significant differences in activity patterns on weekdays and weekends. 
