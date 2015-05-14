@@ -7,12 +7,45 @@ output:
 
 
 ## Loading and preprocessing the data
+Load necessary packages:
+```{r}
+library(dplyr)
+library(ggplot2)
+```
 
+Unzip raw data file if necessary:
+```{r}
+if(!file.exists("activity.csv")) {
+    if(!file.exists("activity.zip")) {
+        print("Source data not in working directory.")
+    } else unzip("activity.zip")
+}
+```
+
+Load raw data and format date variable:
+```{r}
+activity <- tbl_df(read.csv("activity.csv"))
+activity$date <- as.Date(activity$date, format="%Y-%m-%d")
+```
 
 
 ## What is mean total number of steps taken per day?
+Calculate total steps per day:
+```{r}
+activity_by_day <- group_by(activity, date)
+stepsperday <- summarize(activity_by_day, totalsteps = sum(steps))
+print(stepsperday)
+qplot(totalsteps, data=stepsperday, xlab="Total Step in One Day",
+      ylab="Frequency", main="Histogram of Total Steps Per Day")
+```
 
+```{r}
+meansteps <- mean(stepsperday$totalsteps, na.rm=T)
+mediansteps <- median(stepsperday$totalsteps, na.rm=T)
+```
 
+**Mean Steps Per Day:** ```r format(meansteps, scientific=F)```  
+**Median Steps Per Day:** ```r mediansteps```  
 
 ## What is the average daily activity pattern?
 
