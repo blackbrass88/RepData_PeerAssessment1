@@ -56,7 +56,7 @@ Calculate the average steps per interval:
 activity_by_time <- group_by(activity, interval)
 avginterval <- summarise(activity_by_time, average = mean(steps, na.rm=T))
 qplot(x=interval, y=average, data=avginterval, geom="line",
-      xlab="Time of Day (minutes from midnight", ylab="Average Number of Steps Recorded")
+      xlab="Time of Day (minutes from midnight)", ylab="Average Number of Steps Recorded")
 ```
 
 
@@ -111,3 +111,17 @@ The histograms show us that imputing the missing values greatly increases the st
 However, there is little difference in the mean or median between the 2 data sets.
 
 ## Are there differences in activity patterns between weekdays and weekends?
+Add factor variable for weekday vs weekend
+```{r}
+activityimpute$daytype[weekdays(activityimpute$date) %in% c("Saturday","Sunday")] <- "weekend"
+activityimpute$daytype[!(weekdays(activityimpute$date) %in% c("Saturday","Sunday"))] <- "weekday"
+activityimpute$daytype <- as.factor(activityimpute$daytype)
+```
+
+Build data set to plot average steps at each interval by weekday & weekend
+```{r}
+activitygrouped <- group_by(activityimpute, interval, daytype)
+avgintervaldays <- summarise(activitygrouped, average = mean(steps, na.rm=T))
+qplot(x=interval, y=average, data=avgintervaldays, facets=daytype~., geom="line",
+      xlab="Time of Day (minutes from midnight)", ylab="Average Number of Steps Recorded")
+```
