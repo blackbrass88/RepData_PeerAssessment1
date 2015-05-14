@@ -11,6 +11,7 @@ Load necessary packages:
 ```{r}
 library(dplyr)
 library(ggplot2)
+library(xtable)
 ```
 
 Unzip raw data file if necessary:
@@ -31,10 +32,14 @@ activity$date <- as.Date(activity$date, format="%Y-%m-%d")
 
 ## What is mean total number of steps taken per day?
 Calculate total steps per day:
-```{r}
+```{r showtable, results="asis"}
 activity_by_day <- group_by(activity, date)
 stepsperday <- summarize(activity_by_day, totalsteps = sum(steps))
-print(stepsperday)
+print(xtable(stepsperday), type="html")
+```
+
+
+```{r}
 qplot(totalsteps, data=stepsperday, xlab="Total Step in One Day",
       ylab="Frequency", main="Histogram of Total Steps Per Day")
 ```
@@ -49,7 +54,19 @@ mediansteps <- median(stepsperday$totalsteps, na.rm=T)
 
 ## What is the average daily activity pattern?
 
+```{r}
+activity_by_time <- group_by(activity, interval)
+avginterval <- summarise(activity_by_time, average = mean(steps, na.rm=T))
+qplot(x=interval, y=average, data=avginterval, geom="line",
+      xlab="Time of Day (minutes from midnight", ylab="Average Number of Steps Recorded")
+```
 
+
+```{r}
+maxinterval <- avginterval[avginterval$average==max(avginterval$average),1]
+```
+
+The interval at **```r maxinterval```** minutes contains the maximum number of average steps.
 
 ## Imputing missing values
 
