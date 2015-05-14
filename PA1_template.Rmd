@@ -11,7 +11,6 @@ Load necessary packages:
 ```{r}
 library(dplyr)
 library(ggplot2)
-library(xtable)
 ```
 
 Unzip raw data file if necessary:
@@ -32,10 +31,9 @@ activity$date <- as.Date(activity$date, format="%Y-%m-%d")
 
 ## What is mean total number of steps taken per day?
 Calculate total steps per day:
-```{r showtable, results="asis"}
+```{r showtable}
 activity_by_day <- group_by(activity, date)
 stepsperday <- summarize(activity_by_day, totalsteps = sum(steps))
-print(xtable(stepsperday), type="html")
 ```
 
 
@@ -53,7 +51,7 @@ mediansteps <- median(stepsperday$totalsteps, na.rm=T)
 **Median Steps Per Day:** ```r mediansteps```  
 
 ## What is the average daily activity pattern?
-
+Calculate the average steps per interval:
 ```{r}
 activity_by_time <- group_by(activity, interval)
 avginterval <- summarise(activity_by_time, average = mean(steps, na.rm=T))
@@ -69,7 +67,47 @@ maxinterval <- avginterval[avginterval$average==max(avginterval$average),1]
 The interval at **```r maxinterval```** minutes contains the maximum number of average steps.
 
 ## Imputing missing values
+Calculate the total number of missing values:
+```{r}
+numofna <- sum(is.na(activity))
+```
+
+There are **```r numofna```** NA values in the data set.
+
+The mean steps at the matching inverval shall be used to estimate NA values.
+
+```{r}
+activityimpute <- activity
+replacementvalues <- activityimpute %>% filter(is.na(steps)) %>% left_join(avginterval)
+activityimpute$steps[is.na(activityimpute$steps)] <- replacementvalues$average
+```
+
+Calculate total steps per day with imputed data:
+```{r}
+activity_by_day_impute <- group_by(activityimpute, date)
+stepsperdayimpute <- summarize(activity_by_day_impute, totalsteps = sum(steps))
+```
 
 
+```{r}
+qplot(totalsteps, data=stepsperdayimpute, xlab="Total Step in One Day",
+      ylab="Frequency", main="Histogram of Total Steps Per Day (Imputed Data)")
+qplot(totalsteps, data=stepsperday, xlab="Total Step in One Day",
+      ylab="Frequency", main="Histogram of Total Steps Per Day", ylim=c(0,12.5))
+```
+
+```{r}
+meanstepsimpute <- mean(stepsperdayimpute$totalsteps, na.rm=T)
+medianstepsimpute <- median(stepsperdayimpute$totalsteps, na.rm=T)
+```
+
+
+|Data Set| Mean| Median|
+|--------|----:|------:|
+|Original| ```r format(meansteps, scientific=F)```| ```r format(mediansteps, scientific=F)```|
+|Imputed| ```r format(meanstepsimpute, scientific=F)```| ```r format(medianstepsimpute, scientific=F)```|
+
+The histograms show us that imputing the missing values greatly increases the steps in one day at the median value. 
+However, there is little difference in the mean or median between the 2 data sets.
 
 ## Are there differences in activity patterns between weekdays and weekends?
